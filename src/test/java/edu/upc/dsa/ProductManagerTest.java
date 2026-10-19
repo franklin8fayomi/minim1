@@ -1,6 +1,10 @@
-import models.Order;
-import models.Product;
-import models.User;
+package edu.upc.dsa;
+
+import edu.upc.dsa.exceptions.ProductNotFoundException;
+import edu.upc.dsa.exceptions.UserNotFoundException;
+import edu.upc.dsa.models.Order;
+import edu.upc.dsa.models.Product;
+import edu.upc.dsa.models.User;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,7 +17,7 @@ public class ProductManagerTest {
 
     @Before
     public void setUp() {
-        pm = new ProductManagerImpl();
+        pm = ProductManagerImpl.getInstance();
         pm.addProduct("C1", "Coca-cola zero", 2);
         pm.addProduct("C2", "Coca-cola", 2.5);
         pm.addProduct("B1", "Lomo queso", 3);
@@ -42,6 +46,8 @@ public class ProductManagerTest {
 
     @After
     public void tearDown() {
+        // Al ser un Singleton, hay que vaciarlo para que cada test empiece de cero
+        this.pm.clear();
         this.pm = null;
     }
 
@@ -65,10 +71,12 @@ public class ProductManagerTest {
     @Test
     public void productByPriceTest() {
         List<Product> products = pm.getProductsByPrice();
-        Assert.assertEquals(3.5, products.get(0).getPrice(), 0.001);
-        Assert.assertEquals(3.0, products.get(1).getPrice(), 0.001);
-        Assert.assertEquals(2.5, products.get(2).getPrice(), 0.001);
-        Assert.assertEquals(2.0, products.get(3).getPrice(), 0.001);
+        // Orden ASCENDENTE por precio (enunciado)
+        Assert.assertEquals(2.0, products.get(0).getPrice(), 0.001);
+        Assert.assertEquals(2.0, products.get(1).getPrice(), 0.001);
+        Assert.assertEquals(2.25, products.get(2).getPrice(), 0.001);
+        Assert.assertEquals(2.5, products.get(3).getPrice(), 0.001);
+        Assert.assertEquals(3.5, products.get(products.size() - 1).getPrice(), 0.001);
     }
 
 
@@ -119,7 +127,7 @@ public class ProductManagerTest {
         o2.addLP(2, "C2"); //, "coca-cola");
         o2.addLP(5, "B1");
         o2.addLP(1, "CF1");
-        pm.addOrder(o);
+        pm.addOrder(o2);
 
         Assert.assertEquals(2, pm.numOrders());
 
@@ -165,7 +173,7 @@ public class ProductManagerTest {
         Assert.assertEquals(2, pm.numOrders());
         Order o1 = pm.deliverOrder();
         Assert.assertEquals(1, pm.numOrders());
-        Assert.assertEquals("NIF1", o1.getUser());
+        Assert.assertEquals("NIF1", o1.getUser().getId());
         Assert.assertEquals(1, o1.getUser().numOrders());
 
         Assert.assertEquals(2, c1.getSales());
@@ -176,7 +184,7 @@ public class ProductManagerTest {
 
         Order o2 = pm.deliverOrder();
         Assert.assertEquals(0, pm.numOrders());
-        Assert.assertEquals("NIF2", o2.getUser());
+        Assert.assertEquals("NIF2", o2.getUser().getId());
         Assert.assertEquals(1, o2.getUser().numOrders());
 
         Assert.assertEquals(2, c1.getSales());
@@ -199,5 +207,24 @@ public class ProductManagerTest {
         List<Order> l2 = u2.orders();
         Assert.assertEquals(1, l2.size());
 
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void addOrderUnknownUserTest() {
+        Order o = new Order("NIF_NO_EXISTE");
+        o.addLP(1, "C1");
+        pm.addOrder(o);
+    }
+
+    @Test(expected = ProductNotFoundException.class)
+    public void addOrderUnknownProductTest() {
+        Order o = new Order("NIF1");
+        o.addLP(1, "PRODUCTO_NO_EXISTE");
+        pm.addOrder(o);
+    }
+
+    @Test
+    public void deliverOrderEmptyQueueTest() {
+        Assert.assertNull(pm.deliverOrder());
     }
 }

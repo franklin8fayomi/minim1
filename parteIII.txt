@@ -1,0 +1,51 @@
+PARTE III - Tablas y relaciones necesarias
+==========================================
+
+1) User  (usuarios)
+   - id        VARCHAR  PK   (NIF del usuario)
+   - name      VARCHAR
+   - surname   VARCHAR
+   - mail      VARCHAR
+
+2) Product  (productos)
+   - id        VARCHAR  PK
+   - name      VARCHAR
+   - price     DOUBLE
+   (El número de ventas NO hace falta guardarlo como columna: se puede
+    calcular con SUM(quantity) de OrderLine de los pedidos servidos. Si se
+    quiere por rendimiento, se puede añadir una columna numSales.)
+
+3) Orders  (pedidos)   ("Order" es palabra reservada en SQL)
+   - id          INT      PK AUTO_INCREMENT
+   - userId      VARCHAR  FK -> User(id)
+   - createdAt   DATETIME  (fecha de llegada; permite servir en orden FIFO)
+   - delivered   BOOLEAN   (false = pendiente, true = servido)
+   - deliveredAt DATETIME  (NULL mientras no se sirve)
+
+4) OrderLine  (líneas de pedido, LP)
+   - orderId    INT      FK -> Orders(id)
+   - productId  VARCHAR  FK -> Product(id)
+   - quantity   INT
+   PK compuesta (orderId, productId)
+
+Relaciones
+----------
+- User 1 ---- N Orders        : un usuario hace muchos pedidos; cada pedido es de un usuario.
+- Orders N ---- M Product     : un pedido tiene muchos productos y un producto aparece en
+                                muchos pedidos. Esta relación N:M se resuelve con la tabla
+                                intermedia OrderLine, que además guarda la cantidad.
+
+Consultas de las funcionalidades
+--------------------------------
+- Productos por precio:   SELECT * FROM Product ORDER BY price ASC;
+- Realizar pedido:        INSERT INTO Orders (userId, createdAt, delivered) VALUES (?, NOW(), false);
+                          INSERT INTO OrderLine (orderId, productId, quantity) VALUES (?, ?, ?);  -- una por línea
+- Servir pedido (FIFO):   SELECT id FROM Orders WHERE delivered = false ORDER BY createdAt, id LIMIT 1;
+                          UPDATE Orders SET delivered = true, deliveredAt = NOW() WHERE id = ?;
+- Pedidos de un usuario:  SELECT * FROM Orders WHERE userId = ? AND delivered = true;
+- Productos por ventas:   SELECT p.id, p.name, p.price, COALESCE(SUM(l.quantity), 0) AS sales
+                          FROM Product p
+                          LEFT JOIN OrderLine l ON l.productId = p.id
+                          LEFT JOIN Orders o ON o.id = l.orderId AND o.delivered = true
+                          GROUP BY p.id, p.name, p.price
+                          ORDER BY sales DESC;

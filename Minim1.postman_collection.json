@@ -1,0 +1,465 @@
+{
+  "info": {
+    "name": "Minim1 - Shop API",
+    "description": "Colección para probar el servicio REST del Mínimo 1. Ejecutar en orden (Runner) con el servidor recién arrancado.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Listar productos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shop/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "products"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Productos por precio (ascendente)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shop/products/price",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "products",
+            "price"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Ordenado ascendente por precio\", function () {",
+              "  var p = pm.response.json();",
+              "  for (var i = 1; i < p.length; i++) { pm.expect(p[i].price).to.be.at.least(p[i-1].price); }",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Añadir producto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/shop/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "products"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"W1\",\n  \"name\": \"Aigua\",\n  \"price\": 1.5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Añadir usuario",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/shop/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "users"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"NIF16\",\n  \"name\": \"Pepe\",\n  \"surname\": \"Electrónico\",\n  \"mail\": \"pepe.electronico@gmail.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Hacer pedido (NIF1)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/shop/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "orders"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"NIF1\",\n  \"lines\": [\n    {\n      \"quantity\": 2,\n      \"productId\": \"C1\"\n    },\n    {\n      \"quantity\": 1,\n      \"productId\": \"B1\"\n    },\n    {\n      \"quantity\": 1,\n      \"productId\": \"D1\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Hacer pedido (NIF2)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/shop/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "orders"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"NIF2\",\n  \"lines\": [\n    {\n      \"quantity\": 2,\n      \"productId\": \"C2\"\n    },\n    {\n      \"quantity\": 5,\n      \"productId\": \"B1\"\n    },\n    {\n      \"quantity\": 1,\n      \"productId\": \"CF1\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Pedido de usuario inexistente (404)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/shop/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "orders"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"NO_EXISTE\",\n  \"lines\": [\n    {\n      \"quantity\": 1,\n      \"productId\": \"C1\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Servir pedido (sale NIF1, FIFO)",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shop/orders/deliver",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "orders",
+            "deliver"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Primero en llegar: NIF1\", function () { pm.expect(pm.response.json().userId).to.eql(\"NIF1\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Servir pedido (sale NIF2)",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shop/orders/deliver",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "orders",
+            "deliver"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Segundo: NIF2\", function () { pm.expect(pm.response.json().userId).to.eql(\"NIF2\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Servir sin pedidos pendientes (404)",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shop/orders/deliver",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "orders",
+            "deliver"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Pedidos realizados por NIF1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shop/users/NIF1/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "users",
+            "NIF1",
+            "orders"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Pedidos de usuario inexistente (404)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shop/users/NO_EXISTE/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "users",
+            "NO_EXISTE",
+            "orders"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Productos por ventas (descendente)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/shop/products/sales",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "shop",
+            "products",
+            "sales"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"B1 es el más vendido\", function () { pm.expect(pm.response.json()[0].id).to.eql(\"B1\"); });"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/dsaApp"
+    }
+  ]
+}
